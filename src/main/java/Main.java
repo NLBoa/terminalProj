@@ -8,7 +8,7 @@ public class Main {
             String ans = sc.nextLine();
             if (ans.equals("exit") || ans.startsWith("exit ")) {
                 break;
-            } if(ans.startsWith("echo ")){
+            } if(ans.startsWith("type ")){
 
                 switch(ans.substring(4)){
                     case "echo", "exit", "type" -> {
