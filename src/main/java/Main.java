@@ -1,3 +1,7 @@
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
@@ -10,13 +14,30 @@ public class Main {
                 break;
             } else if(ans.startsWith("type ")){
 
-                switch(ans.substring(5)){
-                    case "echo", "exit", "type" -> {
-                        System.out.println(ans.substring(5) + " is a shell builtin");
+                String command = ans.substring(5);
+                
+                String path = System.getenv("PATH");
+
+                String[] dirs = path.split(File.pathSeparator);
+
+                for(String d : dirs) {
+                    Path p = Paths.get(d, command);
+
+                    if(Files.isExecutable(p)){
+                        System.out.println(command + "is" + path);
+                        break;
                     }
-                    default -> { System.out.println(ans.substring(5) + ": not found"); }
+                }
+                
+                switch(command){
+                    case "echo", "exit", "type" -> {
+                        System.out.println(command + " is a shell builtin");
+                    }
+                    default -> { System.out.println(command + ": not found"); }
                     
                 }
+
+
             }
             else if(ans.equals(" echo") || ans.startsWith("echo ")){
                 System.out.println(ans.length() > 4 ? ans.substring(5) : "");
