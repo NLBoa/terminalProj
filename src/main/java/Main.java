@@ -24,7 +24,7 @@ public class Main {
                     Path p = Paths.get(d, command);
 
                     if(Files.isExecutable(p)){
-                        System.out.println(command + "is" + path);
+                        System.out.println(command + " is " + p);
                         break;
                     }
                 }
