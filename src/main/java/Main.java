@@ -15,11 +15,20 @@ public class Main {
             } else if(ans.startsWith("type ")){
 
                 String command = ans.substring(5);
-                
                 String path = System.getenv("PATH");
-
                 String[] dirs = path.split(File.pathSeparator);
 
+
+                                switch(command){
+                    case "echo", "exit", "type" -> {
+                        System.out.println(command + " is a shell builtin");
+                        break;
+                    }
+                    default -> { System.out.println(command + ": not found"); }
+                    
+                }
+
+                
                 for(String d : dirs) {
                     Path p = Paths.get(d, command);
 
@@ -28,16 +37,6 @@ public class Main {
                         break;
                     }
                 }
-                
-                switch(command){
-                    case "echo", "exit", "type" -> {
-                        System.out.println(command + " is a shell builtin");
-                    }
-                    default -> { System.out.println(command + ": not found"); }
-                    
-                }
-
-
             }
             else if(ans.equals(" echo") || ans.startsWith("echo ")){
                 System.out.println(ans.length() > 4 ? ans.substring(5) : "");
