@@ -1,4 +1,3 @@
-import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,26 +15,17 @@ public class Main {
 
                 String command = ans.substring(5);
                 String path = System.getenv("PATH");
-                String[] dirs = path.split(File.pathSeparator);
 
-
-                                switch(command){
+                switch(command){
                     case "echo", "exit", "type" -> {
                         System.out.println(command + " is a shell builtin");
                         break;
                     }
-                    default -> { System.out.println(command + ": not found"); }
+                    default -> { 
+                        if(!customPath(command, path))
+                            System.out.println(command + ": not found");
+                     }
                     
-                }
-
-                
-                for(String d : dirs) {
-                    Path p = Paths.get(d, command);
-
-                    if(Files.isExecutable(p)){
-                        System.out.println(command + " is " + p);
-                        break;
-                    }
                 }
             }
             else if(ans.equals(" echo") || ans.startsWith("echo ")){
@@ -44,5 +34,22 @@ public class Main {
                 System.out.println(ans + ": command not found");
             }
         }
+    }
+
+    private static boolean customPath(String command, String path){
+        
+        String[] dirs = path.split(":");
+
+        for(String d : dirs) {
+            
+            Path p = Paths.get(d, command);
+
+            if(Files.isExecutable(p)){
+                System.out.println(command + " is " + p);
+                return true;
+            }
+        }
+
+        return false;
     }
 }
