@@ -8,13 +8,13 @@ public class Main {
             String ans = sc.nextLine();
             if (ans.equals("exit") || ans.startsWith("exit ")) {
                 break;
-            } if(ans.startsWith("type ")){
+            } else if(ans.startsWith("type ")){
 
-                switch(ans.substring(4)){
+                switch(ans.substring(5)){
                     case "echo", "exit", "type" -> {
-                        System.out.println(ans.substring(4) + "is a shell builtin");
+                        System.out.println(ans.substring(5) + " is a shell builtin");
                     }
-                    default -> { System.out.println(ans.substring(4) + ": not found"); }
+                    default -> { System.out.println(ans.substring(5) + ": not found"); }
                     
                 }
             }
