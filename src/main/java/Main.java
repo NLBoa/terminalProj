@@ -1,16 +1,14 @@
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
         while(true){
+
             System.out.print("$ ");
             String ans = sc.nextLine();
-
             String path = System.getenv("PATH");
+            int spaceIndex = ans.indexOf(' ');
+            String firstWord = spaceIndex == -1 ? ans : ans.substring(0, spaceIndex);
 
             if (ans.equals("exit") || ans.startsWith("exit ")) {
                 break;
@@ -33,7 +31,8 @@ public class Main {
             }
             else if(ans.equals(" echo") || ans.startsWith("echo ")){
                 System.out.println(ans.length() > 4 ? ans.substring(5) : "");
-            } else if(customPath((ans.substring(0, ans.indexOf(' '))), path, false)){
+            }             
+            else if(customPath(firstWord, path, false)){
 
 
                 //Breaks each word into it's own array
