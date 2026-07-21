@@ -1,6 +1,8 @@
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -11,37 +13,38 @@ public class Main {
             System.out.print("$ ");
             String ans = sc.nextLine();
             String path = System.getenv("PATH");
-            int spaceIndex = ans.indexOf(' ');
-            String firstWord = spaceIndex == -1 ? ans : ans.substring(0, spaceIndex);
 
-            if (ans.equals("exit") || ans.startsWith("exit ")) {
+            List<String> tokens = tokenize(ans);
+            if(tokens.isEmpty()){
+                continue;
+            }
+
+            String command = tokens.get(0);
+            List<String> commandArgs = tokens.subList(1, tokens.size());
+
+            if (command.equals("exit")) {
                 break;
-            } else if(ans.startsWith("type ")){
+            } else if(command.equals("type")){
 
-                String command = ans.substring(5);
-
-                switch(command){
-                    case "echo", "exit", "type" -> {
-                        System.out.println(command + " is a shell builtin");
-                        break;
-                    }
-                    default -> { 
-                        if(!customPath(command, path, true)) {
-                            System.out.println(command + ": not found");
+                for(String c : commandArgs){
+                    switch(c){
+                        case "echo", "exit", "type" -> System.out.println(c + " is a shell builtin");
+                        default -> {
+                            if(!customPath(c, path, true)) {
+                                System.out.println(c + ": not found");
+                            }
                         }
-                     }
-                    
+                    }
                 }
             }
-            else if(ans.equals(" echo") || ans.startsWith("echo ")){
-                System.out.println(ans.length() > 4 ? ans.substring(5) : "");
-            }             
-            else if(customPath(firstWord, path, false)){
+            else if(command.equals("echo")){
+                System.out.println(String.join(" ", commandArgs));
+            }
+            else if(customPath(command, path, false)){
 
+                //ProcessBuilder needs the full argument list, with the program name as the first element
+                String[] words = tokens.toArray(new String[0]);
 
-                //Breaks each word into it's own array
-                String[] words = ans.trim().split("\\s+");
-                
                 //ProcessBuilder is a command that can execute external commands. InheritIO allows child processes to execute on parent terminal
                 ProcessBuilder pb = new ProcessBuilder(words).inheritIO();
 
@@ -55,15 +58,16 @@ public class Main {
                 System.out.println(ans + ": command not found");
             }
         }
+
     }
 
     //checks to see if type path is valid or not (meant for path method)
     private static boolean customPath(String command, String path, Boolean isType){
-        
+
         String[] dirs = path.split(":");
 
         for(String d : dirs) {
-            
+
             Path p = Paths.get(d, command);
 
             if(Files.isExecutable(p) && isType){
@@ -75,5 +79,37 @@ public class Main {
         }
 
         return false;
+    }
+
+    //splits a command line into tokens, treating single-quoted spans as literal text merged into the surrounding token
+    private static List<String> tokenize(String input){
+        List<String> tokens = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+        boolean tokenStarted = false;
+
+        for(int i = 0; i < input.length(); i++){
+            char c = input.charAt(i);
+
+            if(c == '\''){
+                inQuotes = !inQuotes;
+                tokenStarted = true;
+            } else if(Character.isWhitespace(c) && !inQuotes){
+                if(tokenStarted){
+                    tokens.add(current.toString());
+                    current.setLength(0);
+                    tokenStarted = false;
+                }
+            } else {
+                current.append(c);
+                tokenStarted = true;
+            }
+        }
+
+        if(tokenStarted){
+            tokens.add(current.toString());
+        }
+
+        return tokens;
     }
 }
