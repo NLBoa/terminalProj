@@ -94,8 +94,18 @@ public class Main {
             char c = input.charAt(i);
             if(c == '\\' && backslashStarted == false && inSingleQuotes == false)
             { 
-                backslashStarted = true;
-                tokenStarted = true;
+                if(inDoubleQuotes){
+                    char next = (i + 1 < input.length()) ? input.charAt(i + 1) : '\0';
+                    if(isDoubleQuoteEscape(next)){
+                        backslashStarted = true;
+                    } else {
+                        current.append(c);
+                    }
+                    tokenStarted = true;
+                } else {
+                    backslashStarted = true;
+                    tokenStarted = true;
+                }
 
             } else if(c == '\'' && inDoubleQuotes == false && backslashStarted == false){
                 inSingleQuotes = !inSingleQuotes;
@@ -122,5 +132,12 @@ public class Main {
         }
 
         return tokens;
+    }
+
+    public static boolean isDoubleQuoteEscape(char next){
+        return switch(next){
+            case '\"', '\\', '$', '`', '\n' -> true;
+            default -> false;
+        };
     }
 }
