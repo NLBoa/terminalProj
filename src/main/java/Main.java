@@ -95,10 +95,9 @@ public class Main {
             if(c == '\''){
                 inSingleQuotes = !inSingleQuotes;
                 tokenStarted = true;
-            if(c == '\"'){
+            } else if(c == '\"'){
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
-            }
             } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes){
                 if(tokenStarted){
                     tokens.add(current.toString());
