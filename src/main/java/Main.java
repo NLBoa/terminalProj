@@ -92,13 +92,13 @@ public class Main {
         for(int i = 0; i < input.length(); i++){
             char c = input.charAt(i);
 
-            if(c == '\''){
+            if(c == '\'' && inDoubleQuotes == false){
                 inSingleQuotes = !inSingleQuotes;
                 tokenStarted = true;
             } else if(c == '\"'){
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
-            } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes){
+            } else if(Character.isWhitespace(c) && !inSingleQuotes || !inDoubleQuotes){
                 if(tokenStarted){
                     tokens.add(current.toString());
                     current.setLength(0);
