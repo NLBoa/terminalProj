@@ -85,16 +85,21 @@ public class Main {
     private static List<String> tokenize(String input){
         List<String> tokens = new ArrayList<>();
         StringBuilder current = new StringBuilder();
-        boolean inQuotes = false;
+        boolean inSingleQuotes = false;
+        boolean inDoubleQuotes = false;
         boolean tokenStarted = false;
 
         for(int i = 0; i < input.length(); i++){
             char c = input.charAt(i);
 
             if(c == '\''){
-                inQuotes = !inQuotes;
+                inSingleQuotes = !inSingleQuotes;
                 tokenStarted = true;
-            } else if(Character.isWhitespace(c) && !inQuotes){
+            if(c == '\"'){
+                inDoubleQuotes = !inDoubleQuotes;
+                tokenStarted = true;
+            }
+            } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes){
                 if(tokenStarted){
                     tokens.add(current.toString());
                     current.setLength(0);
