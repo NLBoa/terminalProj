@@ -100,7 +100,7 @@ public class Main {
             } else if(c == '\'' && inDoubleQuotes == false && backslashStarted == false){
                 inSingleQuotes = !inSingleQuotes;
                 tokenStarted = true;
-            } else if(c == '\"' && backslashStarted == false && inDoubleQuotes == false){
+            } else if(c == '\"' && backslashStarted == false && inSingleQuotes == false){
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
             } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes && backslashStarted == false){
