@@ -98,7 +98,7 @@ public class Main {
             } else if(c == '\"'){
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
-            } else if(Character.isWhitespace(c) && !inSingleQuotes || !inDoubleQuotes){
+            } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes){
                 if(tokenStarted){
                     tokens.add(current.toString());
                     current.setLength(0);
