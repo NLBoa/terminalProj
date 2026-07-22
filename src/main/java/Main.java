@@ -19,7 +19,7 @@ public class Main {
                 continue;
             }
 
-            String command = tokens.get(0);
+            String command = tokens.get(0).strip();
             List<String> commandArgs = tokens.subList(1, tokens.size());
 
             if (command.equals("exit")) {
@@ -88,23 +88,30 @@ public class Main {
         boolean inSingleQuotes = false;
         boolean inDoubleQuotes = false;
         boolean tokenStarted = false;
+        boolean backslashStarted = false;
 
         for(int i = 0; i < input.length(); i++){
             char c = input.charAt(i);
+            if(c == '\\')
+            { 
+                backslashStarted = true;
+                tokenStarted = true;
 
-            if(c == '\'' && inDoubleQuotes == false){
+            } else if(c == '\'' && inDoubleQuotes == false && backslashStarted == false){
                 inSingleQuotes = !inSingleQuotes;
                 tokenStarted = true;
-            } else if(c == '\"'){
+            } else if(c == '\"' && backslashStarted == false){
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
-            } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes){
+            } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes && backslashStarted == false){
                 if(tokenStarted){
                     tokens.add(current.toString());
                     current.setLength(0);
                     tokenStarted = false;
                 }
             } else {
+
+                if(backslashStarted) backslashStarted = false;
                 current.append(c);
                 tokenStarted = true;
             }
