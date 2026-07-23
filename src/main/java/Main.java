@@ -30,8 +30,8 @@ public class Main {
                 pipeLineCommands.add(command);
                 int pipeCommandIdx = tokens.indexOf("|");
                 pipeLineCommands.add(tokens.get(pipeCommandIdx + 1));
-                List<String> headArgs = tokens.subList(1, pipeCommandIdx);
-                List<String> tailArgs = tokens.subList(pipeCommandIdx + 2, tokens.size());
+                List<String> headArgs = new ArrayList<>(tokens.subList(1, pipeCommandIdx));
+                List<String> tailArgs = new ArrayList<>(tokens.subList(pipeCommandIdx + 2, tokens.size()));
 
                 pipeline(pipeLineCommands, headArgs, tailArgs);
                 continue;
