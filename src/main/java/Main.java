@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +14,7 @@ public class Main {
             System.out.print("$ ");
             String ans = sc.nextLine();
             String path = System.getenv("PATH");
+            boolean isPipeline = false;
 
             List<String> tokens = tokenize(ans);
             if(tokens.isEmpty()){
@@ -21,6 +23,19 @@ public class Main {
 
             String command = tokens.get(0).strip();
             List<String> commandArgs = tokens.subList(1, tokens.size());
+
+            if(ans.contains("|")){
+                isPipeline = true;
+                List<String> pipeLineCommands = new ArrayList<>();
+                pipeLineCommands.add(command);
+                int pipeCommandIdx = tokens.indexOf("|");
+                pipeLineCommands.add(tokens.get(pipeCommandIdx + 1));
+                List<String> headArgs = tokens.subList(1, pipeCommandIdx);
+                List<String> tailArgs = tokens.subList(pipeCommandIdx + 2, tokens.size());
+
+                pipeline(pipeLineCommands, headArgs, tailArgs);
+                continue;
+            }
 
             if (command.equals("exit")) {
                 break;
@@ -92,6 +107,7 @@ public class Main {
 
         for(int i = 0; i < input.length(); i++){
             char c = input.charAt(i);
+            
             if(c == '\\' && backslashStarted == false && inSingleQuotes == false)
             { 
                 if(inDoubleQuotes){
@@ -114,6 +130,7 @@ public class Main {
                 inDoubleQuotes = !inDoubleQuotes;
                 tokenStarted = true;
             } else if(Character.isWhitespace(c) && !inSingleQuotes && !inDoubleQuotes && backslashStarted == false){
+
                 if(tokenStarted){
                     tokens.add(current.toString());
                     current.setLength(0);
@@ -140,4 +157,20 @@ public class Main {
             default -> false;
         };
     }
+
+    public static void pipeline(List<String> commands, List<String> headArgs, List<String> tailArgs) throws IOException, InterruptedException{
+
+        List<ProcessBuilder> builders = new ArrayList<>();
+
+        headArgs.add(0, commands.get(0));
+        tailArgs.add(0, commands.get(1));
+        builders.add(new ProcessBuilder(headArgs));
+        builders.add(new ProcessBuilder(tailArgs));
+        builders.get(1).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
+        List<Process> process = ProcessBuilder.startPipeline(builders);
+        int exitCode = process.get(process.size() - 1).waitFor();
+    }
+
+
 }
