@@ -26,14 +26,17 @@ public class Main {
             List<String> commandArgs = tokens.subList(1, tokens.size());
 
             if(ans.contains("|")){
-                List<String> pipeLineCommands = new ArrayList<>();
-                pipeLineCommands.add(command);
-                int pipeCommandIdx = tokens.indexOf("|");
-                pipeLineCommands.add(tokens.get(pipeCommandIdx + 1));
-                List<String> headArgs = new ArrayList<>(tokens.subList(1, pipeCommandIdx));
-                List<String> tailArgs = new ArrayList<>(tokens.subList(pipeCommandIdx + 2, tokens.size()));
+                // List<String> pipeLineCommands = new ArrayList<>();
+                // pipeLineCommands.add(command);
+                // int pipeCommandIdx = tokens.indexOf("|");
+                // pipeLineCommands.add(tokens.get(pipeCommandIdx + 1));
+                // List<String> headArgs = new ArrayList<>(tokens.subList(1, pipeCommandIdx));
+                // List<String> tailArgs = new ArrayList<>(tokens.subList(pipeCommandIdx + 2, tokens.size()));
 
-                pipeline(pipeLineCommands, headArgs, tailArgs, path);
+                // pipeline(pipeLineCommands, headArgs, tailArgs, path);
+                // continue;
+
+                pipelineControlCenter(pipelineTokenize(ans));
                 continue;
             }
 
@@ -67,7 +70,7 @@ public class Main {
 
     }
 
-    private static void pipelineControlCenter(List<String> commands){
+    private static void pipelineControlCenter(List<String> commands) throws IOException, InterruptedException{
 
         boolean isBuiltin = false;
         
@@ -82,7 +85,7 @@ public class Main {
         ArrayList<ArrayList<String>> notBuillitinPipelineList = new ArrayList<>();
         if(!isBuiltin){
             ArrayList<String> val = new ArrayList<>();
-            for(int i = 1; i < commands.size(); i++){
+            for(int i = 0; i < commands.size(); i++){
                 String c = commands.get(i);
                 if(!c.equals("|")){
                     val.add(c);
@@ -92,19 +95,32 @@ public class Main {
                 }
             }
 
-            nonBuiltinPipeline(notBuillitinPipelineList);
+            nonBuiltinPipeline(notBuillitinPipelineList, commands.get(0));
         }
 
     }
 
-    private static void nonBuiltinPipeline(ArrayList<ArrayList<String>> list){
+    private static void nonBuiltinPipeline(ArrayList<ArrayList<String>> list, String file) throws IOException, InterruptedException{
         List<ProcessBuilder> pb = new ArrayList<ProcessBuilder>();
 
         for(ArrayList<String> a : list){
             pb.add(new ProcessBuilder(a));
         }
 
-        
+        pb.get(0).redirectOutput(ProcessBuilder.Redirect.INHERIT);
+
+        List<Process> process = ProcessBuilder.startPipeline(pb);
+        process.get(process.size() - 1).waitFor();
+    }
+
+    //Pipeline for only builtin Commands
+    private static void BuiltinPipeline(){
+
+    }
+
+    //Pipeline for a mix of Builtin and non Builtin
+    private static void MixedPipeline(){
+
     }
 
 
