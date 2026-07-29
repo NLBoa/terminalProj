@@ -42,6 +42,72 @@ public class Main {
 
     }
 
+    private static List<String> pipelineTokenize(String input){
+
+        List<String> tokens = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+
+        for(int i = 0; i < input.length(); i++){
+            char c = input.charAt(i);
+
+            if(c == '|'){
+                if(input.length() > i+1 && Character.isWhitespace(input.charAt(i+1))){
+                    i++;
+                }
+                tokens.add("|");
+            } else if(Character.isWhitespace(c)){
+                tokens.add(current.toString());
+                current.setLength(0);
+            } else {
+                    current.append(c);
+            }
+        }
+
+        return tokens;
+
+    }
+
+    private static void pipelineControlCenter(List<String> commands){
+
+        boolean isBuiltin = false;
+        
+        for(int i = 1; i < commands.size(); i++){
+            String val = commands.get(i);
+
+            if(isBuiltin((val))){
+                isBuiltin = true;
+            }
+        }
+
+        ArrayList<ArrayList<String>> notBuillitinPipelineList = new ArrayList<>();
+        if(!isBuiltin){
+            ArrayList<String> val = new ArrayList<>();
+            for(int i = 1; i < commands.size(); i++){
+                String c = commands.get(i);
+                if(!c.equals("|")){
+                    val.add(c);
+                } else {
+                    notBuillitinPipelineList.add(val);
+                    val = new ArrayList<>();
+                }
+            }
+
+            nonBuiltinPipeline(notBuillitinPipelineList);
+        }
+
+    }
+
+    private static void nonBuiltinPipeline(ArrayList<ArrayList<String>> list){
+        List<ProcessBuilder> pb = new ArrayList<ProcessBuilder>();
+
+        for(ArrayList<String> a : list){
+            pb.add(new ProcessBuilder(a));
+        }
+
+        
+    }
+
+
     //splits a command line into tokens, treating single-quoted spans as literal text merged into the surrounding token
     private static List<String> tokenize(String input){
         List<String> tokens = new ArrayList<>();
@@ -189,6 +255,8 @@ public class Main {
     }
 
     public static void pipeline(List<String> commands, List<String> headArgs, List<String> tailArgs, String path) throws IOException, InterruptedException{
+
+        //Should be pipeline Args, 
 
         String headCommand = commands.get(0);
         String tailCommand = commands.get(1);
