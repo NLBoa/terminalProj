@@ -260,6 +260,8 @@ public class Main {
             String commandStr = String.join(" ", jobs.get(i).command) + " &";
             if(i == jobs.size() - 1){
                 value = "[" + jobs.get(i).jobNumber + "]+  Running                 " + commandStr;
+            } else if(i == jobs.size() - 2) {
+                value = "[" + jobs.get(i).jobNumber + "]-  Running                 " + commandStr;
             } else {
                 value = "[" + jobs.get(i).jobNumber + "]  Running                 " + commandStr;
             }
