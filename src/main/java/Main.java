@@ -254,25 +254,29 @@ public class Main {
 
     private static void printJobs(){
 
+        List<Job> finished = new ArrayList<>();
+
         for(int i = 0; i < jobs.size(); i++)
         {
             String value;
-            String commandStr = String.join(" ", jobs.get(i).command);
+            String commandStr = String.join(" ", jobs.get(i).command) + " &";
             String status = jobs.get(i).process.isAlive() ? "Running" : "Done";
             if(i == jobs.size() - 1){
                 value = "[" + jobs.get(i).jobNumber + "]+  " + status + "                 " + commandStr;
             } else if(i == jobs.size() - 2) {
                 value = "[" + jobs.get(i).jobNumber + "]-  " + status + "                 " + commandStr;
             } else {
-                value = "[" + jobs.get(i).jobNumber + "]  " + status + "                 " + commandStr;
+                value = "[" + jobs.get(i).jobNumber + "]   " + status + "                 " + commandStr;
             }
 
             if(status.equals("Done")){
-                jobs.remove(i);
+                finished.add(jobs.get(i));
             }
 
             System.out.println(value);
         }
+
+        jobs.removeAll(finished);
     };
 
     private static void type(List<String> commandArgs, String path){
