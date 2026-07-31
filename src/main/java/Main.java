@@ -16,7 +16,7 @@ public class Main {
         Scanner sc = new Scanner(System.in);
 
         while(true){
-
+            doneJobs();
             System.out.print("$ ");
             String ans = sc.nextLine();
             String path = System.getenv("PATH");
@@ -250,6 +250,38 @@ public class Main {
 
     private static void echo(List<String> commandArgs){
         System.out.println(String.join(" ", commandArgs));
+    }
+
+    private static void doneJobs(){
+
+        List<Job> finished = new ArrayList<>();
+
+        for(int i = 0; i < jobs.size(); i++){
+            
+            String value;
+            String status = jobs.get(i).process.isAlive() ? "Running" : "Done";
+            String commandStr = String.join(" ", jobs.get(i).command) + (status.equals("Running") ? " &" : "");
+            String paddedStatus = String.format("%-24s", status);
+
+            if(status.equals("Done")){
+                if(i == jobs.size() - 1){
+                    value = "[" + jobs.get(i).jobNumber + "]+  " + paddedStatus + commandStr;
+                } else if(i == jobs.size() - 2) {
+                    value = "[" + jobs.get(i).jobNumber + "]-  " + paddedStatus + commandStr;
+                } else {
+                    value = "[" + jobs.get(i).jobNumber + "]   " + paddedStatus + commandStr;
+                }
+                
+                    if(status.equals("Done")){
+                    finished.add(jobs.get(i));
+                }
+
+                System.out.println(value); 
+
+            }
+        }
+
+        jobs.removeAll(finished);
     }
 
     private static void printJobs(){
