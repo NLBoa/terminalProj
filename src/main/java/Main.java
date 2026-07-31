@@ -253,11 +253,20 @@ public class Main {
     }
 
     private static void printJobs(){
-        for(Job job : jobs){
-            String status = job.process.isAlive() ? "Running" : "Done";
-            System.out.println("[" + job.jobNumber + "]  " + status + "\t\t" + String.join(" ", job.command));
+
+        for(int i = 0; i < jobs.size(); i++)
+        {
+            String value;
+            String commandStr = String.join(" ", jobs.get(i).command) + " &";
+            if(i == jobs.size() - 1){
+                value = "[" + jobs.get(i).jobNumber + "]+  Running                 " + commandStr;
+            } else {
+                value = "[" + jobs.get(i).jobNumber + "]  Running                 " + commandStr;
+            }
+
+            System.out.println(value);
         }
-    }
+    };
 
     private static void type(List<String> commandArgs, String path){
         for(String c : commandArgs){
