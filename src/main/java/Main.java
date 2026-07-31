@@ -194,6 +194,7 @@ public class Main {
             case "echo" -> echo(args);
             case "exit" -> System.exit(0);
             case "type" -> type(args, path);
+            case "jobs" -> System.out.print("");
             default -> {
                 if(customPath(command, path, false)){
                     customPath(tokens);
@@ -206,7 +207,7 @@ public class Main {
 
     private static boolean isBuiltin(String command){
         switch(command){
-            case "echo", "exit", "type" -> {return  true;}
+            case "echo", "exit", "type", "jobs" -> {return  true;}
             default -> { return false;}
         }
     }
@@ -216,6 +217,7 @@ public class Main {
             case "echo" -> echo(args);
             case "exit" -> System.exit(0);
             case "type" -> type(args, path);
+            case "jobs" -> System.out.print("");
         }
     }
 
@@ -226,7 +228,7 @@ public class Main {
     private static void type(List<String> commandArgs, String path){
         for(String c : commandArgs){
             switch(c){
-                case "echo", "exit", "type" -> System.out.println(c + " is a shell builtin");
+                case "echo", "exit", "type", "jobs" -> System.out.println(c + " is a shell builtin");
                 default -> {
                     if(!customPath(c, path, true)) {
                         System.out.println(c + ": not found");
