@@ -261,12 +261,13 @@ public class Main {
             String value;
             String status = jobs.get(i).process.isAlive() ? "Running" : "Done";
             String commandStr = String.join(" ", jobs.get(i).command) + (status.equals("Running") ? " &" : "");
+            String paddedStatus = String.format("%-24s", status);
             if(i == jobs.size() - 1){
-                value = "[" + jobs.get(i).jobNumber + "]+  " + status + "                 " + commandStr;
+                value = "[" + jobs.get(i).jobNumber + "]+  " + paddedStatus + commandStr;
             } else if(i == jobs.size() - 2) {
-                value = "[" + jobs.get(i).jobNumber + "]-  " + status + "                 " + commandStr;
+                value = "[" + jobs.get(i).jobNumber + "]-  " + paddedStatus + commandStr;
             } else {
-                value = "[" + jobs.get(i).jobNumber + "]   " + status + "                 " + commandStr;
+                value = "[" + jobs.get(i).jobNumber + "]   " + paddedStatus + commandStr;
             }
 
             if(status.equals("Done")){
