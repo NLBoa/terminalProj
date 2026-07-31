@@ -22,13 +22,14 @@ public class Main {
             String path = System.getenv("PATH");
             List<String> tokens = tokenize(ans);
 
-            if(tokens.get(tokens.size() - 1).equals("&")){
-                ProcessBuilder pb = new ProcessBuilder(tokens);
+            if(!tokens.isEmpty() && tokens.get(tokens.size() - 1).equals("&")){
+                List<String> bgCommand = tokens.subList(0, tokens.size() - 1);
+                ProcessBuilder pb = new ProcessBuilder(bgCommand).inheritIO();
                 Process process = pb.start();
 
-                Job job = new Job(nextJobNumber++, process.pid(), process, tokens.subList(1, tokens.size() - 1));
+                Job job = new Job(nextJobNumber++, process.pid(), process, bgCommand);
                 jobs.add(job);
-                System.out.println("[" + job.jobNumber + "]" + job.pid);
+                System.out.println("[" + job.jobNumber + "] " + job.pid);
                 continue;
             }
             if(tokens.isEmpty()){
