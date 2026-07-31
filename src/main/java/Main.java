@@ -9,15 +9,28 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    static List<Job> jobs = new ArrayList<>();
+    static int nextJobNumber = 1;
+
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
+
         while(true){
 
             System.out.print("$ ");
             String ans = sc.nextLine();
             String path = System.getenv("PATH");
-
             List<String> tokens = tokenize(ans);
+
+            if(tokens.get(tokens.size() - 1).equals("&")){
+                ProcessBuilder pb = new ProcessBuilder(tokens);
+                Process process = pb.start();
+
+                Job job = new Job(nextJobNumber++, process.pid(), process, tokens.subList(1, tokens.size() - 1));
+                jobs.add(job);
+                System.out.println("[" + job.jobNumber + "]" + job.pid);
+                continue;
+            }
             if(tokens.isEmpty()){
                 continue;
             }
@@ -33,6 +46,19 @@ public class Main {
             runOutputs(ans, command, commandArgs, tokens, path);
         }
 
+    }
+
+    static class Job{
+        int jobNumber;
+        long pid;
+        Process process;
+        List<String> command;
+        Job(int jobNumber, long pid, Process process, List<String> command){
+            this.jobNumber = jobNumber;
+            this.pid = pid;
+            this.process = process;
+            this.command = command;
+        }
     }
 
     private static void pipelineControlCenter(List<String> commands, String path) throws IOException, InterruptedException{
@@ -194,7 +220,7 @@ public class Main {
             case "echo" -> echo(args);
             case "exit" -> System.exit(0);
             case "type" -> type(args, path);
-            case "jobs" -> System.out.print("");
+            case "jobs" -> printJobs();
             default -> {
                 if(customPath(command, path, false)){
                     customPath(tokens);
@@ -223,6 +249,13 @@ public class Main {
 
     private static void echo(List<String> commandArgs){
         System.out.println(String.join(" ", commandArgs));
+    }
+
+    private static void printJobs(){
+        for(Job job : jobs){
+            String status = job.process.isAlive() ? "Running" : "Done";
+            System.out.println("[" + job.jobNumber + "]  " + status + "\t\t" + String.join(" ", job.command));
+        }
     }
 
     private static void type(List<String> commandArgs, String path){
@@ -327,5 +360,6 @@ public class Main {
 
         }
     }
+
 
 }
