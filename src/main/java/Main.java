@@ -10,7 +10,6 @@ import java.util.Scanner;
 
 public class Main {
     static List<Job> jobs = new ArrayList<>();
-    static int nextJobNumber = 1;
 
     public static void main(String[] args) throws Exception {
         Scanner sc = new Scanner(System.in);
@@ -27,7 +26,7 @@ public class Main {
                 ProcessBuilder pb = new ProcessBuilder(bgCommand).inheritIO();
                 Process process = pb.start();
 
-                Job job = new Job(nextJobNumber++, process.pid(), process, bgCommand);
+                Job job = new Job(nextJobNumber(), process.pid(), process, bgCommand);
                 jobs.add(job);
                 System.out.println("[" + job.jobNumber + "] " + job.pid);
                 continue;
@@ -47,6 +46,18 @@ public class Main {
             runOutputs(ans, command, commandArgs, tokens, path);
         }
 
+    }
+
+    private static int nextJobNumber(){
+        int candidate = 1;
+        while(true){
+            int c = candidate;
+            boolean inUse = jobs.stream().anyMatch(j -> j.jobNumber == c);
+            if(!inUse){
+                return candidate;
+            }
+            candidate++;
+        }
     }
 
     static class Job{
