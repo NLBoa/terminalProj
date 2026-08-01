@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -30,6 +32,14 @@ public class Main {
                 jobs.add(job);
                 System.out.println("[" + job.jobNumber + "] " + job.pid);
                 continue;
+            } else if(tokens.contains(">")){
+                int redirectIndex = tokens.indexOf(">");
+                List<String> commandAction = tokens.subList(0, redirectIndex);
+                String fileName = tokens.get(redirectIndex + 1);
+                String redirectCommand = commandAction.get(0);
+                List<String> redirectArgs = commandAction.subList(1, commandAction.size());
+                redirectOutput(redirectCommand, redirectArgs, path, fileName, false);
+                continue;
             }
             if(tokens.isEmpty()){
                 continue;
@@ -46,6 +56,29 @@ public class Main {
             runOutputs(ans, command, commandArgs, tokens, path);
         }
 
+    }
+
+    private static void redirectOutput(String command, List<String> args, String path, String filePath, boolean append) throws IOException, InterruptedException {
+        
+        boolean isBuiltinCmd = isBuiltin(command);
+
+        if(isBuiltinCmd){
+            PrintStream original = System.out;
+            System.setOut(new PrintStream(new FileOutputStream(filePath, append)));
+            runBuiltin(command, args, path);
+            System.out.flush();
+            System.setOut(original);
+        } else {
+            List<String> full = new ArrayList<>(args);
+            full.add(0, command);
+            ProcessBuilder pb = new ProcessBuilder(full);
+            pb.redirectOutput(append
+                ? ProcessBuilder.Redirect.appendTo(new File(filePath))
+                : ProcessBuilder.Redirect.to(new File(filePath)));
+            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            Process process = pb.start();
+            process.waitFor();
+        }
     }
 
     private static int nextJobNumber(){
@@ -176,7 +209,15 @@ public class Main {
         for(int i = 0; i < input.length(); i++){
             char c = input.charAt(i);
 
-            if(c == '\\' && backslashStarted == false && inSingleQuotes == false)
+            if(c == '>' && backslashStarted == false && inSingleQuotes == false){
+                if(tokenStarted){
+                    tokens.add(current.toString());
+                    current.setLength(0);
+                    tokenStarted = false;
+                }
+                tokens.add(">");
+            }
+            else if(c == '\\' && backslashStarted == false && inSingleQuotes == false)
             {
                 if(inDoubleQuotes){
                     char next = (i + 1 < input.length()) ? input.charAt(i + 1) : '\0';
