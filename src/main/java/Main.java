@@ -32,13 +32,16 @@ public class Main {
                 jobs.add(job);
                 System.out.println("[" + job.jobNumber + "] " + job.pid);
                 continue;
-            } else if(tokens.contains(">")){
-                int redirectIndex = tokens.indexOf(">");
+            } else if(tokens.contains(">") || tokens.contains("2>") || tokens.contains(">>") || tokens.contains("2>>")){
+                boolean isAppend = tokens.contains(">>") || tokens.contains("2>>");
+                boolean isStderr = tokens.contains("2>") || tokens.contains("2>>");
+                String marker = isStderr ? (isAppend ? "2>>" : "2>") : (isAppend ? ">>" : ">");
+                int redirectIndex = tokens.indexOf(marker);
                 List<String> commandAction = tokens.subList(0, redirectIndex);
                 String fileName = tokens.get(redirectIndex + 1);
                 String redirectCommand = commandAction.get(0);
                 List<String> redirectArgs = commandAction.subList(1, commandAction.size());
-                redirectOutput(redirectCommand, redirectArgs, path, fileName, false);
+                redirectOutput(redirectCommand, redirectArgs, path, fileName, isAppend, isStderr);
                 continue;
             }
             if(tokens.isEmpty()){
@@ -58,24 +61,38 @@ public class Main {
 
     }
 
-    private static void redirectOutput(String command, List<String> args, String path, String filePath, boolean append) throws IOException, InterruptedException {
-        
+    private static void redirectOutput(String command, List<String> args, String path, String filePath, boolean append, boolean isStderr) throws IOException, InterruptedException {
+
         boolean isBuiltinCmd = isBuiltin(command);
 
         if(isBuiltinCmd){
-            PrintStream original = System.out;
-            System.setOut(new PrintStream(new FileOutputStream(filePath, append)));
-            runBuiltin(command, args, path);
-            System.out.flush();
-            System.setOut(original);
+            if(isStderr){
+                PrintStream original = System.err;
+                System.setErr(new PrintStream(new FileOutputStream(filePath, append)));
+                runBuiltin(command, args, path);
+                System.err.flush();
+                System.setErr(original);
+            } else {
+                PrintStream original = System.out;
+                System.setOut(new PrintStream(new FileOutputStream(filePath, append)));
+                runBuiltin(command, args, path);
+                System.out.flush();
+                System.setOut(original);
+            }
         } else {
             List<String> full = new ArrayList<>(args);
             full.add(0, command);
             ProcessBuilder pb = new ProcessBuilder(full);
-            pb.redirectOutput(append
+            ProcessBuilder.Redirect target = append
                 ? ProcessBuilder.Redirect.appendTo(new File(filePath))
-                : ProcessBuilder.Redirect.to(new File(filePath)));
-            pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+                : ProcessBuilder.Redirect.to(new File(filePath));
+            if(isStderr){
+                pb.redirectError(target);
+                pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
+            } else {
+                pb.redirectOutput(target);
+                pb.redirectError(ProcessBuilder.Redirect.INHERIT);
+            }
             Process process = pb.start();
             process.waitFor();
         }
@@ -210,12 +227,32 @@ public class Main {
             char c = input.charAt(i);
 
             if(c == '>' && backslashStarted == false && inSingleQuotes == false){
-                if(tokenStarted){
-                    tokens.add(current.toString());
+                boolean doubleArrow = (i + 1 < input.length()) && input.charAt(i + 1) == '>';
+                String stdoutToken = doubleArrow ? ">>" : ">";
+                String stderrToken = doubleArrow ? "2>>" : "2>";
+
+                if(tokenStarted && current.toString().equals("1")){
+                    // "1>" / "1>>" written with no space is just the stdout fd marker
                     current.setLength(0);
                     tokenStarted = false;
+                    tokens.add(stdoutToken);
+                } else if(tokenStarted && current.toString().equals("2")){
+                    // "2>" / "2>>" written with no space is the stderr fd marker
+                    current.setLength(0);
+                    tokenStarted = false;
+                    tokens.add(stderrToken);
+                } else {
+                    if(tokenStarted){
+                        tokens.add(current.toString());
+                        current.setLength(0);
+                        tokenStarted = false;
+                    }
+                    tokens.add(stdoutToken);
                 }
-                tokens.add(">");
+
+                if(doubleArrow){
+                    i++;
+                }
             }
             else if(c == '\\' && backslashStarted == false && inSingleQuotes == false)
             {
